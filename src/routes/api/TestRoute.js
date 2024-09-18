@@ -1,9 +1,8 @@
-const router = require("express").Router()
+const router = require("express").Router();
+const HelloController = require("../../controllers/HelloController");
 
-const TestController = require("../../controllers/TestController")
-
-//Path /api/test/hello
-router.post("/hello", TestController.HelloController)
+// Path /api/test/hello
+router.post("/hello", HelloController.HelloController);
 
 router.all("*", (req, res) => {
   return res.status(404).json({
@@ -11,7 +10,7 @@ router.all("*", (req, res) => {
     payload: {
       error: "Invalid /test path",
     },
-  })
-})
+  });
+});
 
-module.exports = router
+module.exports = router;

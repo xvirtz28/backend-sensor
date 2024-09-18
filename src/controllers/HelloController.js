@@ -15,4 +15,7 @@ const HelloController = async (req, res) => {
   })
 }
 
-module.exports = HelloController
+module.exports = { 
+  HelloController,
+  
+}
