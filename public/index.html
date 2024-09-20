@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sensor Management</title>
+</head>
+<style>
+  body {
+    background-image: url('1.jpg');
+    background-size: auto;
+    background-position: center;
+    background-repeat: no-repeat;
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #f4f4f4;
+    text-align: center;
+  }
+
+  h1,
+  h2,
+
+  div {
+    color: #333;
+  }
+
+  button {
+    padding: 10px 15px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+
+  button:hover {
+    background-color: #218838;
+  }
+
+  #sensorContainer {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  .sensor-list {
+    margin-top: 10px;
+  }
+
+  .sensor-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .sensor-item:last-child {
+    border-bottom: none;
+    /* Remove border for last item */
+  }
+
+  .sensor-item strong {
+    color: #555;
+  }
+</style>
+
+<body>
+  <h1>Sensor Management</h1>
+  <center>
+    <h2>Create/Update Sensor</h2>
+    <form id="sensorForm">
+
+      <input type="text" id="station_code" placeholder="Station Code" required><br>
+      <input type="text" id="key" placeholder="Key" required><br>
+      <input type="text" id="channel" placeholder="Channel" required><br>
+      <button type="button" onclick="createSensor()">Create</button>
+      <button type="button" onclick="updateSensor()">Update</button>
+
+    </form>
+  </center>
+
+  <center>
+    <h2>Get/Delete Sensor</h2>
+    <center></center>
+    <form id="manageSensorForm">
+      <input type="text" id="getStationCode" placeholder="Station Code for Get/Delete" required>
+      <button type="button" onclick="getSensor()">Get</button>
+      <button type="button" onclick="deleteSensor()">Delete</button>
+    </form>
+  </center>
+
+
+
+
+  <script>
+    const baseUrl = 'http://localhost:3000/api/user';
+
+    function createSensor() {
+      const station_code = document.getElementById('station_code').value.trim();
+      const key = document.getElementById('key').value.trim();
+      const channel = document.getElementById('channel').value.trim();
+
+      if (!station_code || !key || !channel) {
+        document.getElementById('result').textContent = 'All fields are required.';
+        return;
+      }
+
+      fetch(`${baseUrl}/register/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ station_code, key, channel })
+      })
+        .then(response => response.json())
+        .then(data => displayResult(data))
+        .catch(error => console.error('Error:', error));
+    }
+
+    function updateSensor() {
+      const station_code = document.getElementById('station_code').value.trim();
+      const key = document.getElementById('key').value.trim();
+      const channel = document.getElementById('channel').value.trim();
+
+      if (!station_code || !key || !channel) {
+        document.getElementById('result').textContent = 'All fields are required.';
+        return;
+      }
+
+      fetch(`${baseUrl}/update/${station_code}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, channel })
+      })
+        .then(response => response.json())
+        .then(data => displayResult(data))
+        .catch(error => console.error('Error:', error));
+    }
+
+    function getSensor() {
+      const station_code = document.getElementById('getStationCode').value.trim();
+
+      fetch(`${baseUrl}/profile/${station_code}`)
+        .then(response => response.json())
+        .then(data => displayResult(data))
+        .catch(error => console.erro('Error:', error));
+      document.getElementById('result').innerHTML = `<strong>${data.message}<strong>`;
+
+    }
+
+
+    function deleteSensor() {
+      const station_code = document.getElementById('getStationCode').value.trim();
+
+      fetch(`${baseUrl}/delete`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ station_code })
+      })
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('result').innerHTML = `<strong>${data.message}<strong>`;
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+
+
+    function displayResult(data) {
+      if (data.result === "OK" && data.payload && data.payload.user) {
+        const sensor = data.payload.user;
+        document.getElementById('result').innerHTML = `
+          <strong>Station Code:</strong> ${sensor.station_code}<br>
+          <strong>Key:</strong> ${sensor.key}<br>
+          <strong>Channel:</strong> ${sensor.channel}<br>
+        `;
+      } else {
+        document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+
+      }
+
+    }
+
+  </script>
+  <center>
+    <h2>Result</h2>
+    <pre id="result"></pre>
+    <div id="result"></div>
+  </center>

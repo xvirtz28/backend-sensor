@@ -1,23 +1,37 @@
-  const ProfileController = async (req, res) => {
+const Users = require("../models/Users")
+
+const ProfileController = async (req, res) => {
+  const { station_code } = req.params;
+
+  try {
+    const user = await Users.findOne({ station_code }).exec();
+
+    if (!user) {
+      return res.status(404).json({
+        result: "ERR",
+        message: "User not found"
+      });
+    }
+
     return res.status(200).json({
       result: "OK",
-      payload: {
-        user: {
-        "station_code": "1234",
-        "key": "01",
-        "channel": "A1"
-        },
-      },
+      message: `Station Code: ${user.station_code}, Key: ${user.key}, Channel: ${user.channel}`
     });
-  };
-
+  } catch (err) {
+    console.error("Error fetching user profile:", err);
+    return res.status(500).json({
+      result: "ERR",
+      message: "Internal Server Error"
+    });
+  }
+};
 const RegisterController = async (req, res) => {
   const { station_code, key, channel } = req.body;
 
   if (!station_code || !key || !channel) {
     return res.status(400).json({
       result: "ERR",
-      payload: { error: "Missing required fields" },
+      message: "Missing required fields"
     });
   }
 
@@ -26,25 +40,26 @@ const RegisterController = async (req, res) => {
     if (findStation) {
       return res.status(400).json({
         result: "ERR",
-        payload: { error: "Station code already taken" },
+        message: "Station code already taken"
       });
     }
 
     const newUser = { station_code, key, channel, roles: ["SensorDevice"] };
     await Users.create(newUser);
 
-    return res.json({
+    return res.status(201).json({
       result: "OK",
-      payload: { user: newUser },
+      message: `Sensor created successfully with Station Code: ${newUser.station_code}`
     });
   } catch (err) {
     console.error(err);
     return res.status(500).json({
       result: "ERR",
-      payload: { error: "Internal Server Error" },
+      message: "Internal Server Error"
     });
   }
 };
+
 // const DeleteController = async (req, res) => {
 //   const { station_code } = req.params;
 
@@ -73,4 +88,4 @@ const RegisterController = async (req, res) => {
 //   }
 // };
 
-module.exports = { ProfileController, RegisterController,};
+module.exports = { ProfileController, RegisterController, };
